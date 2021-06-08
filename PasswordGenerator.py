@@ -2,7 +2,6 @@ import random
 import tkinter as tk
 
 # function to generate a password
-
 def generatePass(hasLower, hasUpper, hasSpecial, hasNum, minLen, maxLen):
     """Generate a password
     :param hasLower: True if the password should contain lowercase letters, False if not
@@ -56,11 +55,13 @@ root.geometry('650x500')
 label = tk.Label(root, text="Password Generator", font=("Calibri", 36))
 label.pack()
 
-# CB for checkbox
+# Variables to store checkbox states
 lowerCBvar = tk.BooleanVar()
 upperCBvar = tk.BooleanVar()
 specialCBvar = tk.BooleanVar()
 numCBvar = tk.BooleanVar()
+
+# Checkbox widgets
 lowerCB = tk.Checkbutton(root, text="Include lower case letters", font=("Calibri", 16), variable=lowerCBvar)
 lowerCB.select()
 lowerCB.pack()
