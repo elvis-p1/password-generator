@@ -88,9 +88,9 @@ passLabel.pack()
 passwordEntry = tk.Entry(root,width=40, font=("Calibri", 14))
 passwordEntry.pack()
 
+# Function to put the generated password on the entry area in the GUI
+# Displays coressponding error messages for invalid input
 def generate(hasLower, hasUpper, hasSpecial, hasNum, minLen, maxLen, entry):
-    # Function to put the generated password on the entry area in the GUI
-    # Displays coressponding error messages for invalid input
     if not (hasLower or hasUpper or hasSpecial or hasNum):
         errorLabel.config(text="Check at least one box!")
     elif not (minLen.isnumeric() and maxLen.isnumeric()):
@@ -104,8 +104,31 @@ def generate(hasLower, hasUpper, hasSpecial, hasNum, minLen, maxLen, entry):
         entry.delete(0, "end")
         entry.insert(0, generatePass(hasLower,hasUpper, hasSpecial, hasNum, int(minLen), int(maxLen)))
 
+# Function to select and copy the generated password
+def copyPassword():
+    passwordEntry.selection_range(0, "end")
+    passwordEntry.event_generate("<<Copy>>")
+
+copyButton = tk.Button(root, text="Copy password", font=("Calibri", 14), command=copyPassword)
+
+# If right clicking in the password entry, allows for cut, copy and paste functions
+rcMenu = tk.Menu(root, tearoff=0)
+rcMenu.add_command(label="Cut", command=lambda: passwordEntry.event_generate("<<Cut>>"))
+rcMenu.add_command(label="Copy", command=lambda: passwordEntry.event_generate("<<Copy>>"))
+
+# Right click menu pops up when done in the password entry area, copy/cut function
+def rcPopup(event):
+    try:
+        rcMenu.tk_popup(event.x_root, event.y_root)
+    finally:
+        rcMenu.grab_release()
+
+passwordEntry.bind("<Button-3>", rcPopup)
+
 generateButton = tk.Button(root, text="Generate password", font=("Calibri",14), command=lambda: generate(lowerCBvar.get(), upperCBvar.get(), specialCBvar.get(), numCBvar.get(), minEntry.get(), maxEntry.get(), passwordEntry))
 generateButton.pack()
+copyButton.pack()
 errorLabel = tk.Label(root, text="", fg="#FF3346", font=("Calibri",14))
 errorLabel.pack()
+
 root.mainloop()
