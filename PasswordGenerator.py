@@ -33,13 +33,18 @@ def generatePass(hasLower, hasUpper, hasSpecial, hasNum, minLen, maxLen):
         filteredChars = [i for i in filteredChars if i not in '!@#$%^&*_-<>.']
     
     if hasLower:
-        output.append(chars[random.randint(0,25)])
+        lowercase_char = chars[random.randint(0,25)]
+        output.append(lowercase_char)
     if hasUpper:
-        output.append(chars[random.randint(26,51)])
+        uppercase_char = chars[random.randint(26,51)]
+        output.append(uppercase_char)
     if hasNum:
-        output.append(chars[random.randint(52,61)])
+        number = chars[random.randint(52,61)]
+        output.append(number)
     if hasSpecial:
-        output.append(chars[random.randint(62,len(chars)-1)])
+
+        special_char = chars[random.randint(62,len(chars)-1)]
+        output.append(special_char) 
 
     for i in range(random.randint(minLen-len(output), maxLen-len(output))):
         output.append(filteredChars[random.randint(0,len(filteredChars)-1)])
