@@ -1,56 +1,59 @@
-import random
+import secrets
 import tkinter as tk
 
 # function to generate a password
-def generatePass(hasLower, hasUpper, hasSpecial, hasNum, minLen, maxLen):
+def generatePass(hasLower, hasUpper, hasSpecial, hasNum, passLength):
     """Generate a password
     :param hasLower: True if the password should contain lowercase letters, False if not
     :param hasUpper: True if the password should contain uppercase letters, False if not
     :param hasSpecial: True if the password should contain special characters/symbols
     :param hasNum: True if the password should contain numbers, False otherwise
-    :param minLen: Minimum length of the generated password
-    :param maxLen: Maximum length of the generated password
-    :return: A string that meets the given requirements
+    :param passLength: The length of the password to be generated, as a string
+    :return: The generated password, which is a string
     #
     """
-    chars = list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*-_')
+    
+    lower_chars = list('abcdefghijklmnopqrstuvwxyz')
+    upper_chars = list('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+    special_chars = list('!@#$%^&*-_')
+    num_chars = list('0123456789')
 
-    output = []
-    aNumber = False
-    aBigLetter = False
-    aSmallLetter = False
-    aSpecChar = False
-    
-    filteredChars = chars
-    # removing characters that can be in the password based on what boxes are checked
-    if not hasLower:
-        filteredChars = [i for i in filteredChars if i not in 'abcdefghijklmnopqrstuvwxyz']
-    if not hasUpper:
-        filteredChars = [i for i in filteredChars if i not in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ']
-    if not hasNum:
-        filteredChars = [i for i in filteredChars if not i.isnumeric()]
-    if not hasSpecial:
-        filteredChars = [i for i in filteredChars if i not in '!@#$%^&*_-<>.']
-    
+    # Creating the alphabet based on what the user chose
+    alphabet = []
     if hasLower:
-        lowercase_char = chars[random.randint(0,25)]
-        output.append(lowercase_char)
+        for i in lower_chars:
+            alphabet.append(i)
     if hasUpper:
-        uppercase_char = chars[random.randint(26,51)]
-        output.append(uppercase_char)
-    if hasNum:
-        number = chars[random.randint(52,61)]
-        output.append(number)
+        for i in upper_chars:
+            alphabet.append(i)
     if hasSpecial:
+        for i in special_chars:
+            alphabet.append(i)
+    if hasNum:
+        for i in num_chars:
+            alphabet.append(i)
+    while True:
+        lower_flag = False
+        upper_flag = False
+        num_flag = False
+        special_flag = False
 
-        special_char = chars[random.randint(62,len(chars)-1)]
-        output.append(special_char) 
+        password = ''.join(secrets.choice(alphabet) for i in range(passLength))
+        for c in password:
+            if not lower_flag and c.islower():
+                lower_flag = True
+            elif not upper_flag and c.isupper():
+                upper_flag = True    
+            elif not num_flag and c.isdigit():
+                num_flag = True
+            elif not special_flag and c in special_chars:
+                special_flag = True
 
-    for i in range(random.randint(minLen-len(output), maxLen-len(output))):
-        output.append(filteredChars[random.randint(0,len(filteredChars)-1)])
-    
-    random.shuffle(output)
-    return ''.join(output)
+        # Check if the password matches user requirements
+        if lower_flag == hasLower and upper_flag == hasUpper and num_flag == hasNum and special_flag == hasSpecial:
+            break
+
+    return password
 
 # the GUI
 root = tk.Tk()
@@ -78,15 +81,10 @@ specialCB.pack()
 numCB = tk.Checkbutton(root, text="Include numbers", font=("Calibri", 16), variable=numCBvar)
 numCB.pack()
 
-minLabel = tk.Label(root, text="Minimum number of characters", font=("Calibri", 12))
-minLabel.pack()
-minEntry = tk.Entry(root, width=8, textvariable=tk.StringVar(root, value="8"))
-minEntry.pack()
-
-maxLabel = tk.Label(root, text="Maximum number of characters", font=("Calibri", 12))
-maxLabel.pack()
-maxEntry = tk.Entry(root, width=8, textvariable=tk.StringVar(root, value="16"))
-maxEntry.pack()
+lengthLabel = tk.Label(root, text="Length of password", font=("Calibri", 12))
+lengthLabel.pack()
+lengthEntry = tk.Entry(root, width=8, textvariable=tk.StringVar(root, value="16"))
+lengthEntry.pack()
 
 passLabel = tk.Label(root,text="\nPassword appears below", font=("Calibri",14))
 passLabel.pack()
@@ -95,19 +93,17 @@ passwordEntry.pack()
 
 # Function to put the generated password on the entry area in the GUI
 # Displays coressponding error messages for invalid input
-def generate(hasLower, hasUpper, hasSpecial, hasNum, minLen, maxLen, entry):
+def generate(hasLower, hasUpper, hasSpecial, hasNum, passLength, entry):
     if not (hasLower or hasUpper or hasSpecial or hasNum):
         errorLabel.config(text="Check at least one box!")
-    elif not (minLen.isnumeric() and maxLen.isnumeric()):
-        errorLabel.config(text="Please enter a valid number for the minimum/maximum values")
-    elif(int(minLen) > int(maxLen)):
-        errorLabel.config(text="Max # of characters should be greater than the minimum number")
-    elif(int(minLen) == 0 or int(maxLen) == 0):
-        errorLabel.config(text="Minimum and maximum number of characters cannot be 0")
+    elif not passLength.isnumeric():
+        errorLabel.config(text="Please enter a valid number for the length")
+    elif int(passLength) <= 0:
+        errorLabel.config(text="Invalid length (should be higher than 0)")
     else:
         errorLabel.config(text="")
         entry.delete(0, "end")
-        entry.insert(0, generatePass(hasLower,hasUpper, hasSpecial, hasNum, int(minLen), int(maxLen)))
+        entry.insert(0, generatePass(hasLower,hasUpper, hasSpecial, hasNum, int(passLength)))
 
 # Function to select and copy the generated password
 def copyPassword():
@@ -130,7 +126,7 @@ def rcPopup(event):
 
 passwordEntry.bind("<Button-3>", rcPopup)
 
-generateButton = tk.Button(root, text="Generate password", font=("Calibri",14), command=lambda: generate(lowerCBvar.get(), upperCBvar.get(), specialCBvar.get(), numCBvar.get(), minEntry.get(), maxEntry.get(), passwordEntry))
+generateButton = tk.Button(root, text="Generate password", font=("Calibri",14), command=lambda: generate(lowerCBvar.get(), upperCBvar.get(), specialCBvar.get(), numCBvar.get(), lengthEntry.get(), passwordEntry))
 generateButton.pack()
 copyButton.pack()
 errorLabel = tk.Label(root, text="", fg="#FF3346", font=("Calibri",14))
